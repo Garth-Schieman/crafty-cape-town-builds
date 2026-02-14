@@ -5,13 +5,14 @@ import heroImage from "@/assets/hero-construction.jpg";
 const HeroSection = () => {
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background image */}
+      {/* Background image with blur */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-[4px] scale-105" // Added blur and scale
         style={{ backgroundImage: `url(${heroImage})` }}
       />
+      
       {/* Overlay */}
-      <div className="absolute inset-0 hero-gradient" />
+      <div className="absolute inset-0 hero-gradient opacity-90" />
 
       <div className="relative z-10 container mx-auto px-4 text-center py-32">
         <p className="text-gold-light font-medium tracking-[0.25em] uppercase text-sm md:text-base mb-6 animate-fade-up opacity-0" style={{ animationDelay: "0.2s" }}>

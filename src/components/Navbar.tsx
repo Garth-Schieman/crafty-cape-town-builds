@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.png"; 
 
 const navLinks = [
   { label: "Home", href: "#home" },
@@ -29,11 +30,14 @@ const Navbar = () => {
           : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto flex items-center justify-between py-4 px-4">
+      <div className="container mx-auto flex items-center justify-between py-3 px-4 md:py-4">
+        {/* Updated Logo with 10% size increase */}
         <a href="#home" className="flex items-center gap-2">
-          <span className={`font-display text-xl md:text-2xl font-bold tracking-tight transition-colors ${isScrolled ? "text-foreground" : "text-primary-foreground"}`}>
-            Crafty<span className="text-primary"> Construction</span>
-          </span>
+          <img 
+            src={logo} 
+            alt="Crafty Construction Logo" 
+            className="h-11 w-auto md:h-14 transition-transform hover:scale-105 object-contain"
+          />
         </a>
 
         {/* Desktop Nav */}
