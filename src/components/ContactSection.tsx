@@ -1,279 +1,207 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, MessageCircle, Send, CheckCircle } from "lucide-react";
+import { Send, Plus, Trash2, Calculator, CheckCircle } from "lucide-react";
+
+// The "Price Book" based on your document
+const JOB_RATES: Record<string, { rate: number; unit: string }> = {
+  "Excavations (strip + pad)": { rate: 220, unit: "m³" },
+  "Concrete – Footings (25 MPa)": { rate: 1650, unit: "m³" },
+  "Concrete – Slab (25 MPa)": { rate: 1650, unit: "m³" },
+  "Reinforcement Steel (Y10/Y12)": { rate: 18500, unit: "t" },
+  "Brickwork (230 mm walls)": { rate: 2400, unit: "m³" },
+  "Plaster (Internal)": { rate: 85, unit: "m²" },
+  "Plaster (External)": { rate: 95, unit: "m²" },
+  "Damp Proof Membrane (DPM)": { rate: 45, unit: "m²" },
+  "Boundary Wall Brickwork": { rate: 2400, unit: "m³" },
+  "Boundary Wall Plaster": { rate: 95, unit: "m²" },
+};
 
 const ContactSection = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    message: "",
-  });
-
+  const [formData, setFormData] = useState({ name: "", phone: "", email: "", message: "" });
+  const [selectedJobs, setSelectedJobs] = useState<{ id: number; name: string; qty: number }[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
-  const [builderItems, setBuilderItems] = useState<
-    { name: string; size: number; rate: number }[]
-  >([]);
-
-  const services = [
-  { name: "Excavations", rate: 220, unit: "m³" },
-  { name: "Concrete – Footings", rate: 1650, unit: "m³" },
-  { name: "Concrete – Slab", rate: 1650, unit: "m³" },
-  { name: "Reinforcement Steel", rate: 18500, unit: "t" },
-  { name: "Brickwork (230mm)", rate: 2400, unit: "m³" },
-  { name: "Plaster (Internal)", rate: 85, unit: "m²" },
-  { name: "Plaster (External)", rate: 95, unit: "m²" },
-  { name: "Boundary Wall Brickwork", rate: 2400, unit: "m³" },
-];
-  const updateBuilder = (serviceName: string, value: number, rate: number) => {
-    const exists = builderItems.find((item) => item.name === serviceName);
-
-    if (exists) {
-      setBuilderItems(
-        builderItems.map((item) =>
-          item.name === serviceName ? { ...item, size: value } : item
-        )
-      );
-    } else {
-      setBuilderItems([
-        ...builderItems,
-        { name: serviceName, size: value, rate },
-      ]);
-    }
+  const addJobRow = () => {
+    setSelectedJobs([...selectedJobs, { id: Date.now(), name: Object.keys(JOB_RATES)[0], qty: 0 }]);
   };
 
-  const totalEstimate = builderItems.reduce(
-    (acc, item) => acc + item.size * item.rate,
-    0
-  );
+  const removeJobRow = (id: number) => {
+    setSelectedJobs(selectedJobs.filter(job => job.id !== id));
+  };
+
+  const updateJob = (id: number, field: "name" | "qty", value: any) => {
+    setSelectedJobs(selectedJobs.map(job => job.id === id ? { ...job, [field]: value } : job));
+  };
+
+  const calculateTotal = () => {
+    return selectedJobs.reduce((acc, job) => acc + (job.qty * (JOB_RATES[job.name]?.rate || 0)), 0);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (selectedJobs.length === 0) return alert("Please add at least one job item.");
+    
     setSubmitted(true);
 
-    const breakdown = builderItems
-      .filter((item) => item.size > 0)
-      .map(
-        (item) =>
-          `${item.name}: ${item.size}m² × R${item.rate.toLocaleString()} = R${(
-            item.size * item.rate
-          ).toLocaleString()}`
-      )
+    const breakdown = selectedJobs
+      .map(job => `• *${job.name}*: ${job.qty}${JOB_RATES[job.name].unit} @ R${JOB_RATES[job.name].rate}/u = *R${(job.qty * JOB_RATES[job.name].rate).toLocaleString()}*`)
       .join("%0A");
 
-    const text =
-      `Hi Crafty Construction and Technical Services,%0A%0A` +
-      `*PROJECT BUILDER REQUEST*%0A` +
-      `Client Name: ${encodeURIComponent(formData.name)}%0A` +
-      `Phone: ${encodeURIComponent(formData.phone)}%0A` +
-      `Email: ${encodeURIComponent(formData.email)}%0A%0A` +
-      `${breakdown}%0A%0A` +
-      `Estimated Total: R${totalEstimate.toLocaleString()}%0A%0A` +
-      `Additional Notes: ${encodeURIComponent(formData.message)}`;
+    const text = 
+      `*OFFICIAL QUOTE REQUEST*%0A` +
+      `------------------------------------------%0A` +
+      `👤 *Client:* ${formData.name}%0A` +
+      `📞 *Phone:* ${formData.phone}%0A` +
+      `📧 *Email:* ${formData.email}%0A%0A` +
+      `*PROJECT SCOPE:*%0A${breakdown}%0A%0A` +
+      `💰 *ESTIMATED TOTAL: R${calculateTotal().toLocaleString()}*%0A` +
+      `------------------------------------------%0A` +
+      `📝 *Notes:* ${formData.message || "None"}`;
 
     setTimeout(() => {
       window.open(`https://wa.me/27601133986?text=${text}`, "_blank");
-    }, 1500);
+    }, 1200);
   };
 
-  const inputClass =
-    "w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors";
-
   return (
-    <section id="contact" className="section-padding bg-warm">
-      <div className="container mx-auto">
-        <div className="text-center mb-16">
-          <p className="text-primary font-medium tracking-[0.2em] uppercase text-sm mb-3">
-            Build Your Project
-          </p>
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-            Construction Cost Builder
-          </h2>
-        </div>
+    <section className="py-16 bg-slate-50 min-h-screen">
+      <div className="container mx-auto max-w-5xl px-4">
+        <div className="grid lg:grid-cols-3 gap-8">
+          
+          {/* Main Builder Form */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                <Calculator className="text-primary" /> Itemized Project Builder
+              </h2>
 
-        <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-          {/* BUILDER FORM */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            {submitted ? (
-              <div className="flex flex-col items-center justify-center h-full text-center py-16">
-                <CheckCircle className="h-16 w-16 text-primary mb-4" />
-                <h3 className="font-display text-2xl font-bold mb-2">
-                  Thank You!
-                </h3>
-                <p className="text-muted-foreground">
-                  Redirecting you to WhatsApp...
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* SERVICES */}
-                <div className="space-y-4">
-                  {services.map((service) => (
-                    <div
-                      key={service.name}
-                      className="flex items-center justify-between gap-4 border p-4 rounded-xl"
+              <div className="space-y-4 mb-6">
+                <AnimatePresence>
+                  {selectedJobs.map((job) => (
+                    <motion.div 
+                      key={job.id}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="flex flex-wrap md:flex-nowrap items-end gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200"
                     >
-                      <div>
-                        <p className="font-semibold text-foreground">
-                          {service.name}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          R{service.rate.toLocaleString()} per m²
-                        </p>
+                      <div className="flex-1 min-w-[200px]">
+                        <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Select Job Type</label>
+                        <select 
+                          className="w-full p-2.5 bg-white border rounded-lg text-sm focus:ring-2 focus:ring-primary"
+                          value={job.name}
+                          onChange={(e) => updateJob(job.id, "name", e.target.value)}
+                        >
+                          {Object.keys(JOB_RATES).map(name => (
+                            <option key={name} value={name}>{name}</option>
+                          ))}
+                        </select>
                       </div>
 
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="m²"
-                        className="w-24 px-3 py-2 border rounded-md"
-                        onChange={(e) =>
-                          updateBuilder(
-                            service.name,
-                            Number(e.target.value),
-                            service.rate
-                          )
-                        }
-                      />
-                    </div>
+                      <div className="w-24">
+                        <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Qty ({JOB_RATES[job.name].unit})</label>
+                        <input 
+                          type="number"
+                          className="w-full p-2 border rounded-lg text-sm text-right"
+                          placeholder="0.0"
+                          onChange={(e) => updateJob(job.id, "qty", Number(e.target.value))}
+                        />
+                      </div>
+
+                      <div className="w-32 hidden md:block">
+                        <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Subtotal</label>
+                        <div className="p-2 text-sm font-semibold text-slate-700 bg-white border rounded-lg text-right">
+                          R{(job.qty * JOB_RATES[job.name].rate).toLocaleString()}
+                        </div>
+                      </div>
+
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-red-500 hover:bg-red-50"
+                        onClick={() => removeJobRow(job.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </motion.div>
                   ))}
-                </div>
-
-                {/* TOTAL */}
-                <div className="p-4 bg-primary/10 rounded-xl">
-                  <p className="text-lg font-bold">
-                    Estimated Total: R{totalEstimate.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    *Final price subject to site inspection.
-                  </p>
-                </div>
-
-                {/* CLIENT DETAILS */}
-                <div className="space-y-4 pt-6">
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    required
-                    className={inputClass}
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                  />
-
-                  <input
-                    type="tel"
-                    placeholder="Phone Number"
-                    required
-                    className={inputClass}
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                  />
-
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    required
-                    className={inputClass}
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                  />
-
-                  <textarea
-                    placeholder="Additional Notes"
-                    rows={4}
-                    className={inputClass}
-                    value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  variant="hero"
-                  size="lg"
-                  className="w-full py-6 text-base gap-2"
-                >
-                  <Send className="h-5 w-5" />
-                  Submit Builder Request
-                </Button>
-              </form>
-            )}
-          </motion.div>
-
-          {/* CONTACT INFO */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-8"
-          >
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <MapPin className="h-6 w-6 text-primary" />
-                <div>
-                  <h3 className="font-semibold">Location</h3>
-                  <p className="text-muted-foreground">
-                    Cape Town, South Africa
-                  </p>
-                </div>
+                </AnimatePresence>
               </div>
 
-              <div className="flex items-start gap-4">
-                <Phone className="h-6 w-6 text-primary" />
-                <div>
-                  <h3 className="font-semibold">Phone</h3>
-                  <a
-                    href="tel:+27601133986"
-                    className="text-primary hover:underline"
-                  >
-                    060 113 3986
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <MessageCircle className="h-6 w-6 text-primary" />
-                <div>
-                  <h3 className="font-semibold">WhatsApp</h3>
-                  <a
-                    href="https://wa.me/27601133986"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Chat on WhatsApp
-                  </a>
-                </div>
-              </div>
+              <Button 
+                onClick={addJobRow}
+                variant="outline" 
+                className="w-full border-dashed border-2 py-6 hover:bg-slate-50 text-slate-600"
+              >
+                <Plus className="mr-2 h-4 w-4" /> Add Line Item
+              </Button>
             </div>
 
-            <div className="rounded-xl overflow-hidden shadow-md border h-64">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d423830.37557812646!2d18.37610565!3d-33.914651!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1dcc500f8826eed7%3A0x687fe1fc2828aa87!2sCape%20Town%2C%20South%20Africa!5e0!3m2!1sen!2s!4v1"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                loading="lazy"
-                title="Location"
-              />
+            {/* Client Details */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+              <h3 className="text-lg font-bold mb-4">Contact Information</h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <input 
+                  placeholder="Your Name" 
+                  className="p-3 border rounded-xl text-sm w-full"
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                />
+                <input 
+                  placeholder="Phone Number" 
+                  className="p-3 border rounded-xl text-sm w-full"
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                />
+                <input 
+                  placeholder="Email Address" 
+                  className="p-3 border rounded-xl text-sm w-full md:col-span-2"
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
+                <textarea 
+                  placeholder="Site details or additional requests..." 
+                  className="p-3 border rounded-xl text-sm w-full md:col-span-2 h-24"
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                />
+              </div>
             </div>
-          </motion.div>
+          </div>
+
+          {/* Sticky Summary & Submit */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8 bg-slate-900 text-white p-6 rounded-2xl shadow-xl">
+              <h3 className="text-xl font-bold mb-6 flex justify-between items-center">
+                Summary <span className="text-blue-400 text-sm font-normal">{selectedJobs.length} items</span>
+              </h3>
+              
+              <div className="space-y-3 mb-8">
+                {selectedJobs.map((job) => (
+                   <div key={job.id} className="flex justify-between text-xs text-slate-400">
+                     <span className="truncate max-w-[120px]">{job.name}</span>
+                     <span>R{(job.qty * JOB_RATES[job.name].rate).toLocaleString()}</span>
+                   </div>
+                ))}
+              </div>
+
+              <div className="border-t border-slate-700 pt-4 mb-8">
+                <p className="text-slate-400 text-xs uppercase mb-1">Total Estimated Amount</p>
+                <p className="text-4xl font-bold text-white">R{calculateTotal().toLocaleString()}</p>
+              </div>
+
+              <Button 
+                onClick={handleSubmit}
+                disabled={submitted}
+                className="w-full bg-green-500 hover:bg-green-600 text-white py-7 rounded-xl text-lg font-bold shadow-lg transition-transform active:scale-95"
+              >
+                {submitted ? <CheckCircle className="mr-2" /> : <Send className="mr-2" />}
+                {submitted ? "Sending Quote..." : "Send Quote to WhatsApp"}
+              </Button>
+              
+              <p className="text-[10px] text-slate-500 mt-4 text-center">
+                *Final pricing subject to official site assessment and material fluctuations.
+              </p>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
