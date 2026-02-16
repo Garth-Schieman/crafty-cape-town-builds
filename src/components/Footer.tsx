@@ -1,5 +1,4 @@
 import { Phone, MessageCircle, MapPin } from "lucide-react";
-// Import your favicon to use as the Krayon Digital mini-logo
 import krayonIcon from "../assets/favicon.ico"; 
 
 const Footer = () => {
@@ -69,12 +68,21 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-secondary-foreground/10 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="text-center sm:text-left">
+          <div className="text-center sm:text-left space-y-1">
             <p className="text-secondary-foreground/50 text-sm font-body">
               © {new Date().getFullYear()} Crafty Construction and Technical Services.
             </p>
-            <p className="text-secondary-foreground/50 text-xs font-body mt-1">
+            <p className="text-secondary-foreground/50 text-xs font-body">
               Proudly Serving Cape Town 🇿🇦
+            </p>
+            {/* TERMS & CONDITIONS LINK */}
+            <p>
+              <a 
+                href="/terms-and-conditions" 
+                className="text-secondary-foreground/50 hover:text-primary text-xs font-body underline"
+              >
+                Terms & Conditions
+              </a>
             </p>
           </div>
 
