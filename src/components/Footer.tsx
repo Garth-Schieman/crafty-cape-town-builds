@@ -1,4 +1,6 @@
 import { Phone, MessageCircle, MapPin } from "lucide-react";
+// Import your favicon to use as the Krayon Digital mini-logo
+import krayonIcon from "../assets/favicon.ico"; 
 
 const Footer = () => {
   return (
@@ -65,13 +67,38 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-secondary-foreground/10 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-secondary-foreground/50 text-sm font-body">
-            © {new Date().getFullYear()} Crafty Construction and Technical Services. All rights reserved.
-          </p>
-          <p className="text-secondary-foreground/50 text-sm font-body">
-            Proudly Serving Cape Town 🇿🇦
-          </p>
+        {/* Bottom Bar */}
+        <div className="border-t border-secondary-foreground/10 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="text-center sm:text-left">
+            <p className="text-secondary-foreground/50 text-sm font-body">
+              © {new Date().getFullYear()} Crafty Construction and Technical Services.
+            </p>
+            <p className="text-secondary-foreground/50 text-xs font-body mt-1">
+              Proudly Serving Cape Town 🇿🇦
+            </p>
+          </div>
+
+          {/* Krayon Digital Credit */}
+          <a 
+            href="https://krayon.co.za" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="group flex items-center gap-2.5 px-4 py-2 rounded-full bg-black/5 hover:bg-black/10 transition-all border border-transparent hover:border-primary/20"
+          >
+            <span className="text-secondary-foreground/40 text-[10px] uppercase tracking-widest font-bold">
+              Powered by
+            </span>
+            <div className="flex items-center gap-2">
+              <img 
+                src={krayonIcon} 
+                alt="Krayon Digital" 
+                className="h-5 w-5 rounded-sm opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all" 
+              />
+              <span className="text-secondary-foreground/80 font-display font-bold text-sm tracking-tight group-hover:text-primary transition-colors">
+                Krayon Digital
+              </span>
+            </div>
+          </a>
         </div>
       </div>
     </footer>

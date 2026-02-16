@@ -24,19 +24,25 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled
-          ? "bg-card/95 backdrop-blur-md shadow-lg"
-          : "bg-transparent"
+          ? "bg-white/95 backdrop-blur-md shadow-md py-2" 
+          : "bg-transparent py-4"
       }`}
     >
-      <div className="container mx-auto flex items-center justify-between py-3 px-4 md:py-4">
-        {/* Updated Logo with 10% size increase */}
+      <div className="container mx-auto flex items-center justify-between px-4">
+        {/* Logo Section */}
         <a href="#home" className="flex items-center gap-2">
           <img 
             src={logo} 
             alt="Crafty Construction Logo" 
-            className="h-11 w-auto md:h-14 transition-transform hover:scale-105 object-contain"
+            className="h-11 w-auto md:h-14 transition-all duration-500 hover:scale-105 object-contain"
+            style={{ 
+              /* This filter turns the white logo into a professional Dark Blue/Charcoal when scrolled */
+              filter: isScrolled 
+                ? "brightness(0) saturate(100%) invert(12%) sepia(39%) saturate(1550%) hue-rotate(182deg) brightness(94%) contrast(92%)" 
+                : "none" 
+            }}
           />
         </a>
 
@@ -46,15 +52,19 @@ const Navbar = () => {
             <a
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                isScrolled ? "text-foreground" : "text-primary-foreground"
+              className={`text-sm font-semibold transition-colors hover:text-orange-500 ${
+                isScrolled ? "text-slate-900" : "text-white"
               }`}
             >
               {link.label}
             </a>
           ))}
           <a href="tel:+27601133986">
-            <Button variant="hero" size="sm" className="gap-2">
+            <Button 
+              variant={isScrolled ? "default" : "outline"} 
+              size="sm" 
+              className={`gap-2 ${!isScrolled && "bg-white/10 text-white border-white hover:bg-white hover:text-slate-900"}`}
+            >
               <Phone className="h-4 w-4" />
               Call Now
             </Button>
@@ -63,39 +73,44 @@ const Navbar = () => {
 
         {/* Mobile toggle */}
         <button
-          className="lg:hidden z-50"
+          className="lg:hidden z-50 p-2"
           onClick={() => setIsMobileOpen(!isMobileOpen)}
           aria-label="Toggle menu"
         >
           {isMobileOpen ? (
-            <X className={`h-6 w-6 ${isScrolled ? "text-foreground" : "text-primary-foreground"}`} />
+            <X className="h-6 w-6 text-slate-900" />
           ) : (
-            <Menu className={`h-6 w-6 ${isScrolled ? "text-foreground" : "text-primary-foreground"}`} />
+            <Menu className={`h-6 w-6 transition-colors ${isScrolled ? "text-slate-900" : "text-white"}`} />
           )}
         </button>
       </div>
 
       {/* Mobile menu */}
       {isMobileOpen && (
-        <div className="lg:hidden bg-card/98 backdrop-blur-md border-t border-border animate-fade-up">
-          <div className="container mx-auto py-6 px-4 flex flex-col gap-4">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsMobileOpen(false)}
-                className="text-foreground text-lg font-medium py-2 hover:text-primary transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
-            <a href="tel:+27601133986" className="mt-2">
-              <Button variant="hero" className="w-full gap-2">
-                <Phone className="h-4 w-4" />
-                Call Now
-              </Button>
+        <div className="absolute top-0 left-0 w-full h-screen bg-white flex flex-col items-center justify-center gap-8 animate-in slide-in-from-top duration-300 lg:hidden">
+           <button 
+            onClick={() => setIsMobileOpen(false)}
+            className="absolute top-5 right-5"
+          >
+            <X className="h-8 w-8 text-slate-900" />
+          </button>
+
+          {navLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsMobileOpen(false)}
+              className="text-slate-900 text-2xl font-bold hover:text-orange-500 transition-colors"
+            >
+              {link.label}
             </a>
-          </div>
+          ))}
+          <a href="tel:+27601133986" className="w-2/3">
+            <Button className="w-full gap-2 py-6 text-lg">
+              <Phone className="h-5 w-5" />
+              Call Now
+            </Button>
+          </a>
         </div>
       )}
     </nav>
