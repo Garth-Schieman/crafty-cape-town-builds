@@ -23,7 +23,8 @@ type ViewState =
   | "blueprints"
   | "exterior"
   | "interior"
-  | "liveFootage";
+  | "liveFootage"
+  | "aluminium";
 
 // ----------------- Images -----------------
 
@@ -42,6 +43,11 @@ const interiorImages: GalleryItem[] = Array.from({ length: 26 }, (_, i) => ({
   label: `Interior ${i + 1}`,
 }));
 
+const aluminiumImages: GalleryItem[] = Array.from({ length: 7 }, (_, i) => ({
+  src: getAssetUrl("Aluminium", `al${i + 1}.jpg`),
+  label: `Aluminium ${i + 1}`,
+}));
+
 // ----------------- Videos -----------------
 
 const liveFootageVideos: VideoItem[] = [
@@ -55,6 +61,17 @@ const liveFootageVideos: VideoItem[] = [
   },
 ];
 
+// ----------------- Titles -----------------
+
+const titles: Record<ViewState, string> = {
+  categories: "Our Work",
+  blueprints: "Blueprint Designs",
+  exterior: "Exterior Work",
+  interior: "Interior Work",
+  liveFootage: "Live Project Footage",
+  aluminium: "Aluminium Work",
+};
+
 // ----------------- Component -----------------
 
 const Gallery = () => {
@@ -63,6 +80,7 @@ const Gallery = () => {
   // -------- IMAGE GRID --------
   const RenderGrid = ({ images }: { images: GalleryItem[] }) => (
     <motion.div
+      key="grid"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
@@ -99,6 +117,7 @@ const Gallery = () => {
   // -------- VIDEO GRID --------
   const RenderVideoGrid = ({ videos }: { videos: VideoItem[] }) => (
     <motion.div
+      key="videos"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
@@ -125,6 +144,7 @@ const Gallery = () => {
               src={video.src}
               controls
               preload="metadata"
+              playsInline
               className="w-full rounded-xl"
             />
           </motion.div>
@@ -144,7 +164,7 @@ const Gallery = () => {
             Portfolio
           </p>
           <h2 className="text-4xl md:text-5xl font-bold capitalize">
-            {view === "categories" ? "Our Work" : view}
+            {titles[view]}
           </h2>
         </div>
 
@@ -155,7 +175,7 @@ const Gallery = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-1 md:grid-cols-4 gap-6"
+              className="grid grid-cols-1 md:grid-cols-5 gap-6"
             >
               <CategoryCard
                 title="Blueprints"
@@ -176,8 +196,14 @@ const Gallery = () => {
                 onClick={() => setView("interior")}
               />
               <CategoryCard
+                title="Aluminium Work"
+                img={aluminiumImages[0].src}
+                count={aluminiumImages.length}
+                onClick={() => setView("aluminium")}
+              />
+              <CategoryCard
                 title="Live Footage"
-                img={getAssetUrl("LiveFootage", "thumb.png")} // folder thumbnail only
+                img={getAssetUrl("LiveFootage", "thumb.png")}
                 count={liveFootageVideos.length}
                 onClick={() => setView("liveFootage")}
               />
@@ -187,6 +213,7 @@ const Gallery = () => {
               {view === "blueprints" && <RenderGrid images={blueprintImages} />}
               {view === "exterior" && <RenderGrid images={exteriorImages} />}
               {view === "interior" && <RenderGrid images={interiorImages} />}
+              {view === "aluminium" && <RenderGrid images={aluminiumImages} />}
               {view === "liveFootage" && (
                 <RenderVideoGrid videos={liveFootageVideos} />
               )}
